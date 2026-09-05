@@ -1,0 +1,57 @@
+# =============================================
+# Production compose - app image built + db named volume
+# Usage: docker compose up -d  (runs both)
+#        docker compose build   (rebuilds image)
+# =============================================
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hair_connect_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hair_connect
+      TZ: Asia/Jakarta
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+07:00
+    volumes:
+      - db_data:/var/lib/mysql
+      # one-time init scripts (run only on first init of empty volume)
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "3307:3306" # 3307 on host to avoid clashing with XAMPP's 3306
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backend-barberflow:test
+    container_name: hair_connect_app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: hair_connect
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-prod}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-in-prod}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
+      FONNTE_TOKEN: ${FONNTE_TOKEN:-}
+    # secrets stay out of the image: rely on compose env / .env
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+volumes:
+  db_data:

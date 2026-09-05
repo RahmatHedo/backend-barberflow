@@ -1,0 +1,21 @@
+# =============================================
+# Development image - hot-reload, tools included
+# =============================================
+FROM node:20-alpine
+
+ENV NODE_ENV=development
+
+WORKDIR /app
+
+# Install ALL deps (incl. nodemon = devDependency)
+COPY package*.json ./
+RUN npm ci && npm cache clean --force
+
+# Source mounted live via volume in compose, no COPY needed
+COPY src ./src
+
+EXPOSE 5000
+
+# nodemon watches & restarts on file change; --exitcrash lets compose
+# restart the container if the app dies (e.g. DB not ready yet)
+CMD ["npx", "nodemon", "--legacy-watch", "--exitcrash", "src/app.js"]
