@@ -65,7 +65,7 @@ docker compose -f docker-compose.dev.yml up
 docker compose up -d --build
 ```
 
-DB container memakai port host **3307** (agar tidak bentrok dengan XAMPP di 3306). Skema & seed di-apply otomatis saat volume pertama kali dibuat.
+DB container memakai port host **3306** (port standar MySQL). Skema & seed di-apply otomatis saat volume pertama kali dibuat.
 
 ## Akun default (seed)
 
