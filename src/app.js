@@ -13,6 +13,7 @@ const storeRoutes = require('./modules/store/storeRoutes');
 const serviceRoutes = require('./modules/services/serviceRoutes');
 const queueRoutes = require('./modules/queue/queueRoutes');
 const barberRoutes = require('./modules/barbers/barberRoutes');
+const paymentsRoutes = require('./modules/payments/paymentsRoutes');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/store', storeRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/barbers', barberRoutes);
+app.use('/api/payments', paymentsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

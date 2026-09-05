@@ -3,6 +3,7 @@ const assert = require('node:assert');
 const { idParamSchema, phoneQuerySchema } = require('../src/validations/common');
 const { authSchemas } = require('../src/modules/auth/authSchemas');
 const { queueSchemas } = require('../src/modules/queue/queueSchemas');
+const paymentSchemas = require('../src/modules/payments/paymentSchemas');
 
 test('idParamSchema menerima id angka positif', () => {
   const { error, value } = idParamSchema.validate({ id: 5 });
@@ -72,4 +73,15 @@ test('queueSchemas.transitionAction hanya menerima aksi valid', () => {
   assert.equal(queueSchemas.transitionAction.validate({ action: 'complete' }).error, undefined);
   assert.equal(queueSchemas.transitionAction.validate({ action: 'no-show' }).error, undefined);
   assert.ok(queueSchemas.transitionAction.validate({ action: 'hapus' }).error);
+});
+
+test('paymentSchemas.create menerima payload pembayaran', () => {
+  const { error, value } = paymentSchemas.create.validate({ queue_entry_id: 3, amount: 35000 });
+  assert.equal(error, undefined);
+  assert.equal(value.method, 'cash');
+});
+
+test('paymentSchemas.settle menerima method/amount override', () => {
+  assert.equal(paymentSchemas.settle.validate({ method: 'qris' }).error, undefined);
+  assert.ok(paymentSchemas.settle.validate({}).error);
 });
