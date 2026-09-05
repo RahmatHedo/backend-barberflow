@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 
 const { testConnection } = require('./config/db');
 const { errorHandler } = require('./middleware/errorHandler');
+const authRoutes = require('./modules/auth/authRoutes');
 
 const app = express();
 
@@ -36,6 +37,14 @@ const apiLimiter = rateLimit({
 });
 
 app.use('/api', apiLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'production' ? 20 : 1000,
+  message: { success: false, message: 'Terlalu banyak percobaan login. Coba lagi nanti.' },
+});
+
+app.use('/api/auth', authLimiter, authRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
