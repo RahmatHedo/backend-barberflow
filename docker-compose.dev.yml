@@ -18,7 +18,7 @@ services:
       - db_data_dev:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
     ports:
-      - "3307:3306" # 3307 on host to avoid clashing with XAMPP's 3306
+      - "3306:3306" # host 3306 (MySQL port standard)
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
