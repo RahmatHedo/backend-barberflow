@@ -15,22 +15,28 @@ const sendWhatsAppMessage = async (phone, message) => {
       return null;
     }
 
+    // Fonnte only accepts form-urlencoded bodies (rejects JSON with
+    // "invalid/empty body value" while still returning HTTP 200).
+    const params = new URLSearchParams({
+      target: phone,
+      message: message,
+      countryCode: '62', // Indonesia
+    });
+
     const response = await fetch('https://api.fonnte.com/send', {
       method: 'POST',
       headers: {
         'Authorization': token, // NO "Bearer" prefix for Fonnte
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({
-        target: phone,
-        message: message,
-        countryCode: '62', // Indonesia
-      }),
+      body: params,
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
+    // Fonnte returns HTTP 200 even when delivery fails (e.g. invalid body,
+    // disconnected device). Trust the JSON `status` field, not the HTTP code.
+    if (!response.ok || data.status !== true) {
       console.error('❌ Fonnte API error:', data);
       return null;
     }
